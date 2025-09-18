@@ -1,0 +1,11 @@
+[run]
+omit =
+    xkits_network/unittest/*
+    xkits_network/attr.py
+
+[report]
+exclude_lines =
+    pragma: no cover
+    raise NotImplementedError
+    if __name__ == .__main__.:
+    def __repr__
