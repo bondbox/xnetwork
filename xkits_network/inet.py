@@ -31,7 +31,6 @@ class Peer():
         return self.__timeout
 
     def ping(self, timeout: Optional[int] = None, count: int = 3) -> Generator[float, Any, Tuple[float, float]]:  # noqa:E501
-
         def once(address: str, timeout: int, sequence: int) -> float:
             from ping3 import ping  # pylint:disable=import-outside-toplevel
             result = ping(address, timeout=timeout, seq=sequence)
@@ -53,6 +52,13 @@ class Peer():
 
         # calculate the average RTT and DR(Delivery Rate)
         return _sum / _cnt if _cnt > 0 else _sum, _cnt / _len
+
+    def ping_once(self, timeout: Optional[int] = None, retries: int = 5) -> float:  # noqa:E501
+        """ping until successful or reach retries"""
+        for rtt in (generator := self.ping(timeout, retries)):
+            generator.close()
+            return rtt
+        return -float(timeout or self.timeout)
 
     @classmethod
     def from_string(cls, address: str, timeout: int = TODEF) -> "Peer":
