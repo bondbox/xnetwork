@@ -23,9 +23,11 @@ class TestPeer(TestCase):
     def tearDown(self):
         pass
 
-    @mock.patch("ping3.ping", mock.Mock(side_effect=[1.234]))
+    @mock.patch("ping3.ping", mock.Mock(side_effect=[0.0, 1.234, -1.0]))
     def test_ping(self):
-        self.assertEqual(self.peer.ping(), 1.234)
+        generator = self.peer.ping(count=3)
+        self.assertEqual(next(generator), 1.234)
+        self.assertRaises(StopIteration, next, generator)
 
 
 if __name__ == "__main__":

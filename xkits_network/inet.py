@@ -3,8 +3,10 @@
 from ipaddress import IPv4Address
 from ipaddress import IPv6Address
 from ipaddress import ip_address  # noqa:H306
-from random import randint
+from typing import Any
+from typing import Generator
 from typing import Optional
+from typing import Tuple
 from typing import Union
 
 IPAddress = Union[IPv4Address, IPv6Address]
@@ -28,17 +30,29 @@ class Peer():
     def timeout(self) -> int:
         return self.__timeout
 
-    def ping(self, timeout: Optional[int] = None) -> float:
-        sequence: int = randint(8192, 32767)
+    def ping(self, timeout: Optional[int] = None, count: int = 3) -> Generator[float, Any, Tuple[float, float]]:  # noqa:E501
 
-        def once(address: str, timeout: int) -> float:
+        def once(address: str, timeout: int, sequence: int) -> float:
             from ping3 import ping  # pylint:disable=import-outside-toplevel
             result = ping(address, timeout=timeout, seq=sequence)
             return result if isinstance(result, float) else -float(timeout)
 
-        _timeout: int = min(max(self.TOMIN, timeout or self.timeout), self.TOMAX)  # noqa:E501
         _address: str = str(self.address)
-        return once(_address, _timeout)
+        _timeout: int = min(max(self.TOMIN, timeout or self.timeout), self.TOMAX)  # noqa:E501
+
+        from random import randint  # pylint:disable=import-outside-toplevel
+        _seq: int = randint(8192, 32767)  # 2 bytes sequence number
+        _sum: float = 0.0
+        _cnt: int = 0
+
+        for i in range(_len := min(max(1, count), 32768)):  # range 0-65535
+            if (_rtt := once(_address, _timeout, _seq + i)) > 0:
+                yield _rtt  # RTT(Round-Trip Time)
+                _sum += _rtt
+                _cnt += 1
+
+        # calculate the average RTT and DR(Delivery Rate)
+        return _sum / _cnt if _cnt > 0 else _sum, _cnt / _len
 
     @classmethod
     def from_string(cls, address: str, timeout: int = TODEF) -> "Peer":
