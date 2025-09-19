@@ -4,7 +4,7 @@ from unittest import TestCase
 from unittest import main  # noqa:H306
 from unittest import mock
 
-from xkits_network.link import Peer
+from xkits_network.inet import Peer
 
 
 class TestPeer(TestCase):
@@ -23,7 +23,7 @@ class TestPeer(TestCase):
     def tearDown(self):
         pass
 
-    @mock.patch("xkits_network.link.ping", mock.Mock(side_effect=[1.234]))
+    @mock.patch("xkits_network.inet.ping", mock.Mock(side_effect=[1.234]))
     def test_ping(self):
         self.assertEqual(self.peer.ping(), 1.234)
 
