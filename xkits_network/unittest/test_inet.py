@@ -23,7 +23,7 @@ class TestPeer(TestCase):
     def tearDown(self):
         pass
 
-    @mock.patch("xkits_network.inet.ping", mock.Mock(side_effect=[1.234]))
+    @mock.patch("ping3.ping", mock.Mock(side_effect=[1.234]))
     def test_ping(self):
         self.assertEqual(self.peer.ping(), 1.234)
 

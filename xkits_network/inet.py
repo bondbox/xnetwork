@@ -7,8 +7,6 @@ from random import randint
 from typing import Optional
 from typing import Union
 
-from ping3 import ping
-
 IPAddress = Union[IPv4Address, IPv6Address]
 
 
@@ -34,6 +32,7 @@ class Peer():
         sequence: int = randint(8192, 32767)
 
         def once(address: str, timeout: int) -> float:
+            from ping3 import ping  # pylint:disable=import-outside-toplevel
             result = ping(address, timeout=timeout, seq=sequence)
             return result if isinstance(result, float) else -float(timeout)
 
