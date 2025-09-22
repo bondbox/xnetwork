@@ -1,7 +1,7 @@
 # coding:utf-8
 
 __project__ = "xkits-network"
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 __urlhome__ = "https://github.com/bondbox/xnetwork/"
 __description__ = "Network module"
 
