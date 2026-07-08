@@ -1,0 +1,37 @@
+name = "xnetwork"
+home = "https://github.com/bondbox/xnetwork/"
+description = "Network module"
+keywords = []
+version = "0.2.0"
+
+[authors.zoumingzhe]
+name = "Mingzhe Zou"
+email = "zoumingzhe@outlook.com"
+
+[packages.xkits-network]
+requires_python = ">=3.8"
+authors = [
+    "zoumingzhe",
+]
+keywords = []
+requirements = [
+    "ping3",
+]
+build_backend = "hatchling"
+max_complexity = 15
+max_line_length = 127
+
+[packages.xkits-network.modules.xkits_network]
+base = "xkits_network"
+exclude = [
+    "unittest",
+]
+omitted = [
+    "attribute.py",
+    "unittest/*",
+]
+
+[packages.xkits-network.modules.xkits_network.scripts]
+
+[packages.xkits-network.modules.xkits_network.templates]
+"attribute.py" = true

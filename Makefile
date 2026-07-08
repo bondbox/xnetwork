@@ -1,13 +1,55 @@
 MAKEFLAGS += --always-make
 
-VERSION := $(shell python3 setup.py --version)
+VERSION ?= $(shell python3 -c "from xkits_network.attribute import __version__; print(__version__)")
 
-all: build reinstall test
+all: build test
 
 
 release: all
-	git tag -a v${VERSION} -m "release v${VERSION}"
-	git push origin --tags
+	if [ -n "${VERSION}" ]; then \
+		git tag -a v${VERSION} -m "release v${VERSION}"; \
+		git push origin --tags; \
+	fi
+
+version:
+	@echo ${VERSION}
+
+
+upload:
+	python3 -m pip install --upgrade xpip-upload
+	xpip-upload --config-file .pypirc dist/*
+
+
+build-prepare:
+	python3 -m pip install --upgrade xpip-build
+build-clean:
+	find . -type d -name "__pycache__" -exec rm -rf {} +
+	rm -rf build dist *.egg-info
+build: build-prepare build-clean
+	python3 -m build --sdist --wheel
+
+
+install-requirements:
+	python3 -m pip install --upgrade -r requirements.txt
+install: install-requirements
+	python3 -m pip install --force-reinstall --no-deps dist/*.whl
+uninstall:
+	python3 -m pip uninstall -y xkits-network
+reinstall: uninstall install
+
+
+test-prepare: install-requirements
+	python3 -m pip install --upgrade mock flake8 pylint pytest pytest-cov
+flake8:
+	flake8 xkits_network
+pylint:
+	pylint $(shell git ls-files xkits_network/*.py)
+pytest:
+	pytest --cov --cov-config=.coveragerc --cov-report=term-missing --cov-report=xml --cov-report=html
+pytest-clean:
+	rm -rf .pytest_cache
+test: test-prepare flake8 pylint pytest
+test-clean: pytest-clean
 
 
 clean-cover:
@@ -15,37 +57,3 @@ clean-cover:
 clean-tox:
 	rm -rf .stestr .tox
 clean: build-clean test-clean clean-cover clean-tox
-
-
-upload:
-	xpip-upload --config-file .pypirc dist/*
-
-
-build-clean:
-	xpip-build --debug setup --clean
-build-requirements:
-	pip3 install -r requirements.txt
-build: build-clean build-requirements
-	xpip-build --debug setup --all
-
-
-install:
-	pip3 install --force-reinstall --no-deps dist/*.whl
-uninstall:
-	pip3 uninstall -y xkits-network
-reinstall: uninstall install
-
-
-test-prepare:
-	pip3 install --upgrade mock pylint flake8 pytest pytest-cov
-pylint:
-	pylint $(shell git ls-files xkits_network/*.py)
-flake8:
-	flake8 xkits_network --count --select=E9,F63,F7,F82 --show-source --statistics
-	flake8 xkits_network --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-pytest:
-	pytest --cov=xkits_network --cov-report=term-missing --cov-report=xml --cov-report=html --cov-config=.coveragerc --cov-fail-under=100
-pytest-clean:
-	rm -rf .pytest_cache
-test: test-prepare pylint flake8 pytest
-test-clean: pytest-clean
