@@ -2,7 +2,7 @@ name = "xnetwork"
 home = "https://github.com/bondbox/xnetwork/"
 description = "Network module"
 keywords = []
-version = "0.2.0"
+version = "0.3"
 
 [authors.zoumingzhe]
 name = "Mingzhe Zou"
